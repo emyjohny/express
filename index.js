@@ -12,7 +12,7 @@ const logMiddleware =(req,res,next)=>{
     console.log(req.body);
     next();
 };
-app.use(logMiddleware);
+// app.use(logMiddleware);
 const authMiddleware =(req,res,next)=>{
     if(!req.session.currentUser){
         return res.status(401).json({
@@ -34,13 +34,17 @@ app.post('/',(req,res)=>{
     res.send("post method");
 })
 app.post('/register',(req,res)=>{
-    const result=dataService.register(req.body.name,req.body.acno,req.body.pin,req.body.password);
-res.status(result.statuscode).json(result);
+    dataService.register(req.body.name,req.body.acno,req.body.pin,req.body.password)
+.then(result=>{
+    res.status(result.statuscode).json(result);
+})
+// res.status(result.statuscode).json(result);
 })
 app.post('/login',(req,res)=>{
-    const result=dataService.login(req,req.body.acno,req.body.password)
-    res.status(result.statuscode).json(result)
-})
+    dataService.login(req,req.body.acno,req.body.password).then(result=>{
+        res.status(result.statuscode).json(result);
+      
+})})
 
 app.post('/deposit',authMiddleware,(req,res)=>{
     console.log(req.session.currentUser)
