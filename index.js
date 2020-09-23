@@ -1,9 +1,33 @@
 const express = require('express');
 const dataService = require('./services/data.services')
+const session = require('express-session')
 const app = express();
+app.use(session({
+    secret:'randomsecurestring',
+    resave:false,
+    saveUninitialized:false
+}))
 app.use(express.json());
+const logMiddleware =(req,res,next)=>{
+    console.log(req.body);
+    next();
+};
+app.use(logMiddleware);
+const authMiddleware =(req,res,next)=>{
+    if(!req.session.currentUser){
+        return res.status(401).json({
+          status:false,
+          statuscode:401,
+          message:"Please Login"
+
+        });
+      }
+      else{
+          next();
+      }
+}
 app.get('/',(req,res)=>{
-    res.send("Helloo");
+    res.send("Helloo world");
 })
 
 app.post('/',(req,res)=>{
@@ -14,18 +38,24 @@ app.post('/register',(req,res)=>{
 res.status(result.statuscode).json(result);
 })
 app.post('/login',(req,res)=>{
-    const result=dataService.login(req.body.acno1,req.body.password)
+    const result=dataService.login(req,req.body.acno,req.body.password)
     res.status(result.statuscode).json(result)
 })
-app.post('/deposit',(req,res)=>{
+
+app.post('/deposit',authMiddleware,(req,res)=>{
+    console.log(req.session.currentUser)
     const result=dataService.deposit(req.body.acno,req.body.pin,req.body.amount)
     res.status(result.statuscode).json(result)
 })
-app.get('/transactions',(req,res)=>{
-    const result =dataService.getTransactions();
+app.get('/transactions',authMiddleware,(req,res)=>{
+    const result =dataService.getTransactions(req);
     res.status(200).json(result);
 })
-app.post('/withdraw',(req,res)=>{
+app.delete('/transactions/:id',(req,res)=>{
+   const result=dataService. deleteTransactions(req,req.params.id)
+   res.status(200).json(result);
+})
+app.post('/withdraw',authMiddleware,(req,res)=>{
     const result=dataService.withdraw(req.body.acno,req.body.pin,req.body.amount)
     res.status(result.statuscode).json(result)
 })
