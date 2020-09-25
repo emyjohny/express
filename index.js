@@ -1,7 +1,13 @@
 const express = require('express');
 const dataService = require('./services/data.services')
 const session = require('express-session')
+const cors =require('cors')
 const app = express();
+app.use(cors({
+    origin:'http://localhost:4200',
+    credentials:true
+
+}))
 app.use(session({
     secret:'randomsecurestring',
     resave:false,
@@ -47,21 +53,24 @@ app.post('/login',(req,res)=>{
 })})
 
 app.post('/deposit',authMiddleware,(req,res)=>{
-    console.log(req.session.currentUser)
-    const result=dataService.deposit(req.body.acno,req.body.pin,req.body.amount)
-    res.status(result.statuscode).json(result)
+    // console.log(req.session.currentUser)
+    dataService.deposit(req.body.acno,req.body.pin,req.body.amount).then(result=>{res.status(result.statuscode).json(result)})
+    
 })
 app.get('/transactions',authMiddleware,(req,res)=>{
-    const result =dataService.getTransactions(req);
-    res.status(200).json(result);
+    dataService.getTransactions(req).then(result=>{res.status(result.statuscode).json(result);})
+    
 })
 app.delete('/transactions/:id',(req,res)=>{
-   const result=dataService. deleteTransactions(req,req.params.id)
-   res.status(200).json(result);
+   dataService.deleteTransactions(req,req.params.id)
+   .then(result=>{
+    res.status(result.statuscode).json(result);
+   })
+   
 })
 app.post('/withdraw',authMiddleware,(req,res)=>{
-    const result=dataService.withdraw(req.body.acno,req.body.pin,req.body.amount)
-    res.status(result.statuscode).json(result)
+    dataService.withdraw(req.body.acno,req.body.pin,req.body.amount).then(result=>{ res.status(result.statuscode).json(result)})
+   
 })
 app.put('/',(req,res)=>{
     res.send("put method");
