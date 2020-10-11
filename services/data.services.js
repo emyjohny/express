@@ -114,6 +114,13 @@ const withdraw = (accnum, pin1, amount1) => {
 
         }
       }
+      if(req.session.currentUser!=accnum){
+        return{
+        status: false,
+          statuscode: 422,
+          message: "you are not allowed to do this transaction"
+        }
+      }
       if (user.balance < amount) {
         return {
           status: false,

@@ -4,7 +4,7 @@ const session = require('express-session')
 const cors =require('cors')
 const app = express();
 app.use(cors({
-    origin:'http://localhost:4200',
+    origin:'http://localhost:3001',
     credentials:true
 
 }))
@@ -69,7 +69,7 @@ app.delete('/transactions/:id',(req,res)=>{
    
 })
 app.post('/withdraw',authMiddleware,(req,res)=>{
-    dataService.withdraw(req.body.acno,req.body.pin,req.body.amount).then(result=>{ res.status(result.statuscode).json(result)})
+    dataService.withdraw(req,req.body.acno,req.body.pin,req.body.amount).then(result=>{ res.status(result.statuscode).json(result)})
    
 })
 app.put('/',(req,res)=>{
